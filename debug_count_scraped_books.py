@@ -62,6 +62,15 @@ def count_books_in_folder(folder_path):
 	
 	return total_books
 
+def count_files_in_subdirectories(image_path):
+    total_files = 0
+    for root, dirs, files in os.walk(image_path):
+        total_files += len(files)
+    return total_files
+
 folder_path = './scraped_data'
+image_path = './scraped_data/images'
 total_books = count_books_in_folder(folder_path)
-print(f'Le nombre total de livres dans les fichiers CSV du dossier est de : {total_books}')
+total_images = count_files_in_subdirectories(image_path)
+print(f'{total_books} livres trouvés dans les fichiers CSV du dossier')
+print(f'{total_images} images trouvées dans les sous-repertoires de {image_path}')
