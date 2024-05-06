@@ -132,12 +132,15 @@ def replace_and_remove(string, what_str, new_str):
 		script_errors += 1
 		return string
 
+def ensure_directory_exists(directory):
+	directory_path = Path(directory)
+	if not directory_path.exists():
+		directory_path.mkdir(parents=True)
+
 def download_image(url, directory, filename):
 	global script_errors
 	try:
-		directory_path = Path(directory)
-		if not directory_path.exists():
-			directory_path.mkdir(parents=True)
+		ensure_directory_exists(directory)
 
 		image_path = os.path.join(directory, filename+'.jpg')
 		urllib.request.urlretrieve(url, image_path)
@@ -156,6 +159,9 @@ def convert_rating_to_number(rating_text: str) -> int:
 
 def export_to_csv(data, filename):
 	try:
+		directory = os.path.dirname(filename)
+		ensure_directory_exists(directory)
+		
 		with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
 			fieldnames = ['product_page_url', 'upc', 'title', 'price_including_tax', 'price_excluding_tax', 'number_available', 'product_description', 'category', 'review_rating', 'image_url']
 			writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
