@@ -65,7 +65,7 @@ def scrape_books_by_category(base_url, session):
 				export_to_csv(category_books, f'scraped_data/{str.lower(formatted_category)}_books_data_{timestamp}.csv')
 
 def scrape_books(url, session):
-	"""returns books data from a category"""
+	"""returns array of book data arrays"""
 	soup = get_soup(url, session)
 	if not soup == 'error':
 		books = []
@@ -85,7 +85,7 @@ def scrape_books(url, session):
 		return books
 
 def scrape_book_details(url, session):
-	"""returns bookdata"""
+	"""returns bookdata array"""
 	soup = get_soup(url, session)
 	if not soup == 'error':
 		upc = soup.find('th', string='UPC').find_next('td').text.strip()
