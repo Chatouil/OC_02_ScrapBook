@@ -104,7 +104,7 @@ def scrape_books(url, dl_covers, session):
 		next_page_link = soup.find('li', class_='next') # Check if there's a next page
 		if next_page_link:
 			next_page_url = urljoin(url, next_page_link.find('a')['href'])
-			books += scrape_books(next_page_url, session)  # Recursive call to scrape next page
+			books += scrape_books(next_page_url, dl_covers, session)  # Recursive call to scrape next page
 		
 		return books
 
