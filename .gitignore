@@ -1,1 +1,9 @@
+pyvenv.cfg
+_venv.bat
+_Launcher.bat
+_cmd.bat
+_WorkDir/*
+Include/*
+Lib/*
+Scripts/*
 scraped_data/*
