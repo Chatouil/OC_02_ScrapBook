@@ -10,7 +10,7 @@ import time
 import csv
 import os
 
-'''
+"""
 DATA TO EXTRACT
 ● product_page_url
 ● universal_ product_code (upc)
@@ -25,7 +25,7 @@ DATA TO EXTRACT
 + download image
 
 scraps & downloads 1000 books in ~515s (8m 35s)
-'''
+"""
 
 # Pistes d'amelioration :
 # exporter également les titres formatés dans les csv pour éviter les pertes de data.
@@ -45,35 +45,35 @@ def get_soup(url, session):
 		return soup
 	
 	except requests.RequestException as e:
-		print(f"Error fetching data from {url}: {e}")
+		print(f'Error fetching data from {url}: {e}')
 		global script_errors
 		script_errors += 1
-		return "error"
+		return 'error'
 
 def scrape_books_by_category(base_url, session):
 	soup = get_soup(base_url, session)
-	if not soup == "error":
+	if not soup == 'error':
 		categories = soup.find('div', class_='side_categories').find_all('a')
 		for category in categories:
 			category_url = urljoin(base_url, category['href'])
-			if 'books_1' not in category_url:  # Exclude "Books" category
+			if 'books_1' not in category_url:  # Exclude 'Books' category
 				category_name = category.text.strip()
-				print(f"Scraping books from category: {category_name}")
+				print(f'Scraping books from category: {category_name}')
 				category_books = scrape_books(category_url, session)
-				formatted_category = replace_and_remove(category_name, " ","_")
+				formatted_category = replace_and_remove(category_name, ' ','_')
 				timestamp = generate_timestamp()
 				export_to_csv(category_books, f'scraped_data/{str.lower(formatted_category)}_books_data_{timestamp}.csv')
 
 def scrape_books(url, session):
-	"""returns array of book data arrays"""
+	"""returns books data from a category"""
 	soup = get_soup(url, session)
-	if not soup == "error":
+	if not soup == 'error':
 		books = []
 		
 		for book in soup.find_all('article', class_='product_pod'):
 			book_url = book.find('h3').find('a')['href']
 			book_data = scrape_book_details(urljoin(url, book_url), session)
-			if not book_data == "error":
+			if not book_data == 'error':
 				book_data['product_page_url'] = urljoin(url, book_url)
 				books.append(book_data)
 		
@@ -85,9 +85,9 @@ def scrape_books(url, session):
 		return books
 
 def scrape_book_details(url, session):
-	"""returns array of single book data"""
+	"""returns bookdata"""
 	soup = get_soup(url, session)
-	if not soup == "error":
+	if not soup == 'error':
 		upc = soup.find('th', string='UPC').find_next('td').text.strip()
 		title = soup.find('h1').text.strip()
 		price_including_tax = soup.find('th', string='Price (incl. tax)').find_next('td').text.strip()
@@ -101,7 +101,7 @@ def scrape_book_details(url, session):
 		image_relative_url = soup.find('div', class_='item active').find('img')['src']
 		image_url = urljoin(url, image_relative_url)
 		formatted_title = slugify(title)
-		formatted_category = replace_and_remove(category, " ","_")
+		formatted_category = replace_and_remove(category, ' ','_')
 		category_directory = os.path.join('scraped_data/images', formatted_category)
 		download_image(image_url, category_directory, formatted_title)
 		
@@ -127,7 +127,7 @@ def replace_and_remove(string, what_str, new_str):
 		return replaced_string
 	
 	except AttributeError:
-		print(f"Error formatting string from {string}")
+		print(f'Error formatting string from {string}')
 		global script_errors
 		script_errors += 1
 		return string
@@ -144,11 +144,11 @@ def download_image(url, directory, filename):
 	
 	except urllib.error.URLError as url_error:
 		script_errors += 1
-		print(f"Error downloading image from {url}: {url_error}")
+		print(f'Error downloading image from {url}: {url_error}')
 	
 	except FileNotFoundError as file_error:
 		script_errors += 1
-		print(f"Error creating directory or saving image: {file_error}")
+		print(f'Error creating directory or saving image: {file_error}')
 
 def convert_rating_to_number(rating_text: str) -> int:
 	ratings = {'One': 1, 'Two': 2, 'Three': 3, 'Four': 4, 'Five': 5}
@@ -165,27 +165,27 @@ def export_to_csv(data, filename):
 	except Exception as e:
 		global script_errors
 		script_errors += 1
-		print(f"Error exporting data to CSV file: {e}")
+		print(f'Error exporting data to CSV file: {e}')
 
 def generate_timestamp():
 	now = datetime.now()
-	timestamp = now.strftime("%Y-%m-%d_%H-%M-%S")
+	timestamp = now.strftime('%Y-%m-%d_%H-%M-%S')
 	return timestamp
 
 def main():
 	start_time = time.time()
-	base_url = "http://books.toscrape.com"
+	base_url = 'http://books.toscrape.com'
 	with requests.Session() as session:
 		scrape_books_by_category(base_url, session)
 		end_time = time.time()
 		elapsed_time = end_time - start_time
 		if script_errors > 0:
-			print("There were errors, please review the script and data.")
+			print('There were errors, please review the script and data.')
 		
 		if n_books > 0:
-			print(f"Scraped successfully {n_books} books in: {elapsed_time:.2f} seconds")
+			print(f'Scraped successfully {n_books} books in: {elapsed_time:.2f} seconds')
 		else:
-			print("Failed to scrape books.")
+			print('Failed to scrape books.')
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 	main()
