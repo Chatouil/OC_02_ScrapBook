@@ -214,7 +214,7 @@ def main():
 					break
 				else:
 					category_input = str.lower(input("Quelle catégorie ? : "))
-					category_input = replace_and_remove(string, " ", "-"):
+					category_input = replace_and_remove(string, " ", "-")
 					scrape_category(base_url, category_input, dl_image, session)
 					end_print(start_time)
 					break
