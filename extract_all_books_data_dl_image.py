@@ -160,8 +160,8 @@ def download_image(url, directory, filename):
 
 
 def convert_rating_to_number(rating_text: str) -> int:
-    ratings = {'One': 1, 'Two': 2, 'Three': 3, 'Four': 4, 'Five': 5}
-    return ratings.get(rating_text, 0)
+    ratings = {'Zero' : 0, 'One': 1, 'Two': 2, 'Three': 3, 'Four': 4, 'Five': 5}
+    return ratings.get(rating_text, -1)
 
 
 def export_to_csv(data, filename):
