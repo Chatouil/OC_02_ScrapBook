@@ -28,10 +28,7 @@ scraps & downloads 1000 books in ~515s (8m 35s)
 """
 
 # Pistes d'amelioration :
-# exporter également les titres formatés dans les csv pour éviter les pertes de data.
-# créer un script qui vérifie dans les csv : 
-# 					- le nombre de livre exportés.
-# 					- que chaque entrée de colonne corresponde à son en-tête.
+# exporter également les titres formatés dans les csv pour éviter des pertes de data.
 
 n_books = 0
 script_errors = 0
@@ -103,6 +100,8 @@ def scrape_book_details(url, session):
 		formatted_title = slugify(title)
 		formatted_category = replace_and_remove(category, ' ','_')
 		category_directory = os.path.join('scraped_data/images', formatted_category)
+		
+		cover_title = formatted_title + '_' + upc
 		download_image(image_url, category_directory, formatted_title)
 		
 		global n_books

@@ -48,7 +48,8 @@ def scrape_book_details(url, dl_covers, session):
 		category_directory = os.path.join('scraped_data/images', formatted_category)
 		
 		if dl_covers:
-			download_image(image_url, category_directory, formatted_title)
+			cover_title = formatted_title + '_' + upc
+			download_image(image_url, category_directory, cover_title)
 		
 		global n_books
 		n_books += 1
@@ -71,22 +72,21 @@ def scrape_category(url, input, dl_covers, session):
 		categories = soup.find('div', class_='side_categories').find_all('a')
 		for category in categories:
 			category_url = urljoin(url, category['href'])
+			scrape = False
 			if input != '0':
-				if input in category_url:  # include input category
-					category_name = category.text.strip()
-					print(f'Scraping books from category: {category_name}')
-					category_books = scrape_books(category_url, dl_covers, session)
-					formatted_category = replace_and_remove(category_name, ' ','_')
-					timestamp = generate_timestamp()
-					export_to_csv(category_books, f'scraped_data/{str.lower(formatted_category)}_books_data_{timestamp}.csv')
+				if input in category_url:  # Only include input category
+					scrape = True
 			else:
 				if 'books_1' not in category_url:  # Exclude 'Books' category
-					category_name = category.text.strip()
-					print(f'Scraping books from category: {category_name}')
-					category_books = scrape_books(category_url, dl_covers, session)
-					formatted_category = replace_and_remove(category_name, ' ','_')
-					timestamp = generate_timestamp()
-					export_to_csv(category_books, f'scraped_data/{str.lower(formatted_category)}_books_data_{timestamp}.csv')
+					scrape = True
+			
+			if scrape:
+				category_name = category.text.strip()
+				print(f'Scraping books from category: {category_name}')
+				category_books = scrape_books(category_url, dl_covers, session)
+				formatted_category = replace_and_remove(category_name, ' ','_')
+				timestamp = generate_timestamp()
+				export_to_csv(category_books, f'scraped_data/{str.lower(formatted_category)}_books_data_{timestamp}.csv')
 
 def scrape_books(url, dl_covers, session):
 	"""returns array of book data arrays"""
