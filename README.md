@@ -1,4 +1,4 @@
-# extract_all_books_data_dl_image 🚀
+# Scrap Books 🚀
 
 # ● Project Description
 This script will connect to 'http://books.toscrape.com' & parse the data in as many csv as there is book categories, using the following template : ['product_page_url', 'upc', 'title', 'price_including_tax', 'price_excluding_tax', 'number_available', 'product_description', 'category', 'review_rating', 'image_url'].
