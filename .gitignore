@@ -1,5 +1,4 @@
-pyvenv.cfg
-_venv.bat
+_activate.au3
 _Launcher.bat
 _cmd.bat
 _WorkDir/*

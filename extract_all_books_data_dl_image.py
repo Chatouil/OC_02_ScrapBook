@@ -1,15 +1,3 @@
-from urllib.parse import urljoin
-from datetime import datetime
-from bs4 import BeautifulSoup
-from slugify import slugify
-from pathlib import Path
-import urllib.request
-import urllib.error
-import requests
-import time
-import csv
-import os
-
 """
 DATA TO EXTRACT
 ● product_page_url
@@ -27,8 +15,18 @@ DATA TO EXTRACT
 scraps & downloads 1000 books in ~515s (8m 35s)
 """
 
-# Pistes d'amelioration :
-# exporter également les titres formatés dans les csv pour éviter des pertes de data.
+
+from urllib.parse import urljoin
+from datetime import datetime
+from bs4 import BeautifulSoup
+from slugify import slugify
+from pathlib import Path
+import urllib.request
+import urllib.error
+import requests
+import time
+import csv
+import os
 
 n_books = 0
 script_errors = 0
@@ -37,7 +35,7 @@ def get_soup(url, session):
     """returns soup html content"""
     try:
         response = session.get(url)
-        response.raise_for_status()  # Raise an exception for non-2xx status codes
+        response.raise_for_status()  # raise an exception for non-2xx status codes
         soup = BeautifulSoup(response.content, 'html.parser')
         return soup
     
@@ -48,13 +46,15 @@ def get_soup(url, session):
         return 'error'
 
 
-def scrape_books_by_category(base_url, session):
+def scrape_category(base_url, session):
     soup = get_soup(base_url, session)
-    if not soup == 'error':
+    if soup == 'error':
+        pass
+    else:
         categories = soup.find('div', class_='side_categories').find_all('a')
         for category in categories:
             category_url = urljoin(base_url, category['href'])
-            if 'books_1' not in category_url:  # Exclude 'Books' category
+            if 'books_1' not in category_url:  # exclude 'books' category
                 category_name = category.text.strip()
                 print(f'Scraping books from category: {category_name}')
                 category_books = scrape_books(category_url, session)
@@ -66,7 +66,9 @@ def scrape_books_by_category(base_url, session):
 def scrape_books(url, session):
     """returns array of book data arrays"""
     soup = get_soup(url, session)
-    if not soup == 'error':
+    if soup == 'error':
+        return []
+    else:
         books = []
         
         for book in soup.find_all('article', class_='product_pod'):
@@ -76,10 +78,10 @@ def scrape_books(url, session):
                 book_data['product_page_url'] = urljoin(url, book_url)
                 books.append(book_data)
         
-        next_page_link = soup.find('li', class_='next')  # Check if there's a next page
+        next_page_link = soup.find('li', class_='next')  # check if there's a next page
         if next_page_link:
             next_page_url = urljoin(url, next_page_link.find('a')['href'])
-            books += scrape_books(next_page_url, session)  # Recursive call to scrape next page
+            books += scrape_books(next_page_url, session)  # recursive call to scrape next page
         
         return books
 
@@ -87,7 +89,9 @@ def scrape_books(url, session):
 def scrape_book_details(url, session):
     """returns book_data array"""
     soup = get_soup(url, session)
-    if not soup == 'error':
+    if soup == 'error':
+        return {}
+    else:
         upc = soup.find('th', string='UPC').find_next('td').text.strip()
         title = soup.find('h1').text.strip()
         price_including_tax = soup.find('th', string='Price (incl. tax)').find_next('td').text.strip()
@@ -105,6 +109,7 @@ def scrape_book_details(url, session):
         category_directory = os.path.join('scraped_data/images', formatted_category)
         
         cover_title = formatted_title + '_' + upc
+        
         download_image(image_url, category_directory, cover_title)
         
         global n_books
@@ -192,16 +197,16 @@ def main():
     start_time = time.time()
     base_url = 'http://books.toscrape.com'
     with requests.Session() as session:
-        scrape_books_by_category(base_url, session)
+        scrape_category(base_url, session)
         end_time = time.time()
         elapsed_time = end_time - start_time
         if script_errors > 0:
             print('There were errors, please review the script and data.')
         
-        if n_books > 0:
-            print(f'Scraped successfully {n_books} books in: {elapsed_time:.2f} seconds')
-        else:
+        if n_books == 0:
             print('Failed to scrape books.')
+        else:
+            print(f'Scraped successfully {n_books} books in: {elapsed_time:.2f} seconds')
 
 
 if __name__ == '__main__':

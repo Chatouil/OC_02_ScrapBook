@@ -6,11 +6,15 @@ The csv files will be located in a [scraped_data] folder and named given the boo
 It will also download all books cover in a [scraped_data/*books category] folder.
 
 # ● How to Install and Run the Project
-1. See Requirements.
+1. Requirements :
+	Having Python 3 installed
+	Download the project somewhere on your drive
+	Navigate to this folder within your favourite console and type : py -m venv ./venv
+	Activate your virtual environment by typing : venv\Scripts\activate
+	Apply the projects requirements by typing : py -m  pip install -r requirements.txt
+	
 2. Run the script.
-
-	During Python setup, make sure to install pip and check the environement variable setting.
-	In your console, navigate to the script's folder and execute the script with this command : extract_all_books_data_dl_image.py
+	In your console, still in the script's folder, execute the script with this command : scrap.py
 
 ---
 
