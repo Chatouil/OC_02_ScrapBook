@@ -7,14 +7,14 @@ It will also download all books cover in a [scraped_data/*books category] folder
 
 # ● How to Install and Run the Project
 1. Requirements :
-	Having Python 3 installed
-	Download the project somewhere on your drive
-	Navigate to this folder within your favourite console and type : py -m venv ./venv
-	Activate your virtual environment by typing : venv\Scripts\activate
-	Apply the projects requirements by typing : py -m  pip install -r requirements.txt
+⋅⋅⋅Having Python 3 installed
+⋅⋅⋅Download the project somewhere on your drive
+⋅⋅⋅Navigate to this folder within your favourite console and type : py -m venv ./venv
+⋅⋅⋅Activate your virtual environment by typing : venv\Scripts\activate
+⋅⋅⋅Apply the projects requirements by typing : py -m  pip install -r requirements.txt
 	
 2. Run the script.
-	In your console, still in the script's folder, execute the script with this command : scrap.py
+⋅⋅⋅In your console, still in the script's folder, execute the script with this command : scrap.py
 
 ---
 
