@@ -1,7 +1,7 @@
 # Scrap Books 🚀
   
 # ● Project Description
-This script will connect to 'http://books.toscrape.com' & parse the data in as many csv as there is book categories, using the following template : *product_page_url, upc, title, price_including_tax, price_excluding_tax, number_available, product_description, category, review_rating, image_url*  
+This script will connect to 'http://books.toscrape.com' & parse the data in as many csv as there is book categories, using the following template : *product_page_url, upc, title, price_including_tax, price_excluding_tax, number_available, product_description, category, review_rating, image_url*.  
 The csv files will be located in a [scraped_data] folder and named given the books's category.  
 It will also download all books cover in a [scraped_data/*books category] folder.  
   
