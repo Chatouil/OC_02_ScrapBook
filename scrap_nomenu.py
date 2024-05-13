@@ -165,7 +165,7 @@ def download_image(url, directory, filename):
 
 
 def convert_rating_to_number(rating_text: str) -> int:
-    ratings = {'Zero' : 0, 'One': 1, 'Two': 2, 'Three': 3, 'Four': 4, 'Five': 5}
+    ratings = {'Zero': 0, 'One': 1, 'Two': 2, 'Three': 3, 'Four': 4, 'Five': 5}
     return ratings.get(rating_text, -1)
 
 

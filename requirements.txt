@@ -3,7 +3,7 @@ certifi==2024.2.2
 charset-normalizer==2.0.12
 idna==3.7
 pathlib==1.0.1
-requests==2.26.0
+requests==2.31.0
 slugify==0.0.1
 soupsieve==2.5
 urllib3==1.26.18

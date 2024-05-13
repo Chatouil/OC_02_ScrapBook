@@ -177,7 +177,7 @@ def download_image(url, directory, image_path):
 
 
 def convert_rating_to_number(rating_text: str) -> int:
-    ratings = {'Zero' : 0, 'One': 1, 'Two': 2, 'Three': 3, 'Four': 4, 'Five': 5}
+    ratings = {'Zero': 0, 'One': 1, 'Two': 2, 'Three': 3, 'Four': 4, 'Five': 5}
     return ratings.get(rating_text, -1)
 
 
@@ -238,12 +238,11 @@ def main():
         print("[2] Scraper une catégorie    [4] Scraper une catégorie")
         choice = input("Entrez votre choix: ")
         
-        if not choice in ['1', '2', '3', '4']:
+        if choice not in ['1', '2', '3', '4']:
             print("Choix non conforme. Veuillez entrer un chiffre entre 1 et 4.")
 
         else:
             start_time = time.time()
-            base_url = 'http://books.toscrape.com'
             with requests.Session() as session:
                 if choice == '1' or choice == '2':
                     dl_image = True
