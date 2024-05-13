@@ -18,7 +18,6 @@ menu adds options :
     - with or without covers
 """
 
-
 from urllib.parse import urljoin
 from datetime import datetime
 from bs4 import BeautifulSoup
@@ -31,9 +30,11 @@ import time
 import csv
 import os
 
-
+main_output_folder = 'scraped_data'
+base_urls = ['http://books.toscrape.com']
 n_books = 0
 script_errors = 0
+
 
 def get_soup(url, session):
     """returns soup html content"""
@@ -42,7 +43,7 @@ def get_soup(url, session):
         response.raise_for_status()  # raise an exception for non-2xx status codes
         soup = BeautifulSoup(response.content, 'html.parser')
         return soup
-    
+
     except requests.RequestException as e:
         print(f'Error fetching data from {url}: {e}')
         global script_errors
@@ -50,7 +51,7 @@ def get_soup(url, session):
         return 'error'
 
 
-def scrape_category(url, user_input, dl_covers, session):
+def scrape_category(url, user_input, dl_covers, session, output_folder):
     soup = get_soup(url, session)
     if soup == 'error':
         pass
@@ -65,40 +66,42 @@ def scrape_category(url, user_input, dl_covers, session):
             else:
                 if 'books_1' not in category_url:  # exclude 'books_1' category
                     scrape = True
-            
+
             if scrape:
                 category_name = category.text.strip()
                 print(f'Scraping books from category: {category_name}')
-                category_books = scrape_books(category_url, dl_covers, session)
+                category_books = scrape_books(category_url, dl_covers, session, output_folder)
                 formatted_category = replace_and_remove(category_name, ' ', '_')
                 timestamp = generate_timestamp()
-                export_to_csv(category_books, f'scraped_data/{str.lower(formatted_category)}_books_data_{timestamp}.csv')
+                export_to_csv(category_books,
+                              f'{output_folder}/{str.lower(formatted_category)}_books_data_{timestamp}.csv')
 
 
-def scrape_books(url, dl_covers, session):
+def scrape_books(url, dl_covers, session, output_folder):
     """returns array of book data arrays"""
     soup = get_soup(url, session)
     if soup == 'error':
         return []
     else:
         books = []
-        
+
         for book in soup.find_all('article', class_='product_pod'):
             book_url = book.find('h3').find('a')['href']
-            book_data = scrape_book_details(urljoin(url, book_url), dl_covers, session)
+            book_data = scrape_book_details(urljoin(url, book_url), dl_covers, session, output_folder)
             if not book_data == 'error':
                 book_data['product_page_url'] = urljoin(url, book_url)
                 books.append(book_data)
-        
+
         next_page_link = soup.find('li', class_='next')  # check if there's a next page
         if next_page_link:
             next_page_url = urljoin(url, next_page_link.find('a')['href'])
-            books += scrape_books(next_page_url, dl_covers, session)  # recursive call to scrape next page
-        
+            books += scrape_books(next_page_url, dl_covers, session,
+                                  output_folder)  # recursive call to scrape next page
+
         return books
 
 
-def scrape_book_details(url, dl_covers, session):
+def scrape_book_details(url, dl_covers, session, output_folder):
     """returns book_data array"""
     soup = get_soup(url, session)
     if soup == 'error':
@@ -118,17 +121,17 @@ def scrape_book_details(url, dl_covers, session):
         image_url = urljoin(url, image_relative_url)
         formatted_title = slugify(title)[:46]  # truncate formatted title if more then 46 chars
         formatted_category = replace_and_remove(category, ' ', '_')
-        category_directory = os.path.join('scraped_data/images', formatted_category)
-        
+        category_directory = os.path.join(f'{output_folder}/images', formatted_category)
+
         if dl_covers:
             cover_title = formatted_title + '_' + upc + '.jpg'
             image_path = os.path.join(category_directory, cover_title)
             download_image(image_url, category_directory, image_path)
-            image_url = './images/' + formatted_category + '/' + cover_title
-        
+            image_url = './images/' + formatted_category + '/' + cover_title  # remove this line to export image url instead of image path
+
         global n_books
         n_books += 1
-        
+
         return {
             'upc': upc,
             'title': title,
@@ -147,7 +150,7 @@ def replace_and_remove(string, what_str, new_str):
     try:
         replaced_string = str.lower(string.replace(what_str, new_str))
         return replaced_string
-    
+
     except AttributeError:
         print(f'Error formatting string from {string}')
         global script_errors
@@ -166,11 +169,11 @@ def download_image(url, directory, image_path):
     try:
         ensure_directory_exists(directory)
         urllib.request.urlretrieve(url, image_path)
-    
+
     except urllib.error.URLError as url_error:
         script_errors += 1
         print(f'Error downloading image from {url}: {url_error}')
-    
+
     except FileNotFoundError as file_error:
         script_errors += 1
         print(f'Error creating directory or saving image: {file_error}')
@@ -185,14 +188,14 @@ def export_to_csv(data, filename):
     try:
         directory = os.path.dirname(filename)
         ensure_directory_exists(directory)
-        
+
         with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
-            fieldnames = ['product_page_url', 'upc', 'title', 'price_including_tax', 'price_excluding_tax', 
+            fieldnames = ['product_page_url', 'upc', 'title', 'price_including_tax', 'price_excluding_tax',
                           'number_available', 'product_description', 'category', 'review_rating', 'image_url']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
             writer.writerows(data)
-    
+
     except Exception as e:
         global script_errors
         script_errors += 1
@@ -210,15 +213,20 @@ def end_print(start_time):
     elapsed_time = end_time - start_time
     if script_errors > 0:
         print('There were errors, please review the script and data.')
-    
+
     if n_books == 0:
         print('Failed to scrape books.')
     else:
         print(f'Scraped successfully {n_books} books in: {elapsed_time:.2f} seconds')
 
 
+def urls_loop(category_input, dl_image, session):
+    for url in base_urls:
+        output_folder = main_output_folder + '/' + slugify(url)
+        scrape_category(url, category_input, dl_image, session, output_folder)
+
+
 def main():
-    base_url = "http://books.toscrape.com"
     while True:
         print("\n")
         print("             .--.                   .---.")
@@ -237,7 +245,7 @@ def main():
         print("[1] Tout scraper             [3] Tout scraper")
         print("[2] Scraper une catégorie    [4] Scraper une catégorie")
         choice = input("Entrez votre choix: ")
-        
+
         if choice not in ['1', '2', '3', '4']:
             print("Choix non conforme. Veuillez entrer un chiffre entre 1 et 4.")
 
@@ -248,16 +256,15 @@ def main():
                     dl_image = True
                 else:
                     dl_image = False
-                
+
                 if choice == '1' or choice == '3':
-                    scrape_category(base_url, '0', dl_image, session)
+                    urls_loop('0', dl_image, session)
                     end_print(start_time)
                     break
                 else:
                     print("Veuillez entrer le nom d'une catégorie :")
-                    category_input = str.lower(input("> "))
-                    category_input = replace_and_remove(category_input, " ", "-")
-                    scrape_category(base_url, category_input, dl_image, session)
+                    category_input = replace_and_remove(str.lower(input("> ")), " ", "-")
+                    urls_loop(category_input, dl_image, session)
                     end_print(start_time)
                     break
 
